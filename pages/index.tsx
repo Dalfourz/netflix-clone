@@ -12,6 +12,7 @@ import Modal from '@/components/Modal'
 import Plans from '@/components/Plans'
 import { Product, getProducts } from '@stripe/firestore-stripe-payments'
 import payments from '@/lib/stripe'
+import useSubscription from '@/hooks/useSubscription'
 
 interface Props {
   netflixOriginals: Movie[]
@@ -36,13 +37,13 @@ const Home = ({
   trendingNow,
   products,
 }: Props) => {
-  const { loading } = useAuth()
+  const { loading, user } = useAuth()
   const showModal = useRecoilValue(modalState)
-  const subscription = false
+  const subscription = useSubscription(user)
 
   if (loading || subscription === null) return null
   
-  if (!subscription) return <Plans />
+  if (!subscription) return <Plans products={products}/>
 
   return (
     <div className='relative h-screen bg-gradient-to-b lg:h-[140vh]'>
@@ -59,6 +60,7 @@ const Home = ({
           <Row title="Top Rated" movies={topRated} />
           <Row title="Action Thrillers" movies={actionMovies} />
           {/* My List Component */}
+          
           <Row title="Comedies" movies={comedyMovies} />
           <Row title="Scary Movies" movies={horrorMovies} />
           <Row title="Romance Movies" movies={romanceMovies} />

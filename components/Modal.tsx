@@ -6,6 +6,7 @@ import {
   ThumbUpIcon,
   VolumeOffIcon,
   VolumeUpIcon,
+  CheckIcon,
 } from "@heroicons/react/solid";
 import MuiModal from "@mui/material/Modal";
 import { useEffect, useState } from "react";
@@ -13,6 +14,9 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { Element } from "../typings";
 import ReactPlayer from "react-player/lazy";
 import { FaPlay } from "react-icons/fa";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/firebase";
+import useAuth from "@/hooks/useAuth";
 
 function Modal() {
   const [showModal, setShowModal] = useRecoilState(modalState);
@@ -20,6 +24,8 @@ function Modal() {
   const [trailer, setTrailer] = useState("");
   const [genres, setGenres] = useState<Genre[]>([]);
   const [muted, setMuted] = useState(true);
+  const [addedToList, setAddedToList] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!movie) return;
@@ -42,6 +48,14 @@ function Modal() {
     }
   }, [movie]);
 
+  const handleList = async () => {
+    if (addedToList) {
+      await deleteDoc(
+        doc(db, "customers", user!.uid, "myList", movie?.id.toString()!)
+      );
+    }
+  };
+
   const handleClose = () => {
     setShowModal(false);
   };
@@ -61,7 +75,9 @@ function Modal() {
 
         <div className="relative pt-[56.25%]">
           <ReactPlayer
-            url={`https://www.youtube.com/watch?v=${trailer}` || 'Video not found'}
+            url={
+              `https://www.youtube.com/watch?v=${trailer}` || "Video not found"
+            }
             width="100%"
             height="100%"
             style={{ position: "absolute", top: "0", left: "0" }}
@@ -75,7 +91,12 @@ function Modal() {
                 Play
               </button>
 
-              <button className="modalButton">
+              <button className="modalButton" onClick={handleList}>
+                {addedToList ? (
+                  <CheckIcon className="h-7 w-7" />
+                ) : (
+                  <PlusIcon className="h-7 w-7" />
+                )}
                 <PlusIcon className="h-7 w-7" />
               </button>
 
@@ -118,13 +139,13 @@ function Modal() {
                 </div>
 
                 <div>
-                    <span className="text-[gray]">Original language: </span>
-                    {movie?.original_language}
+                  <span className="text-[gray]">Original language: </span>
+                  {movie?.original_language}
                 </div>
 
                 <div>
-                    <span className="text-[gray]">Total votes: </span>
-                    {movie?.vote_count}
+                  <span className="text-[gray]">Total votes: </span>
+                  {movie?.vote_count}
                 </div>
               </div>
             </div>
