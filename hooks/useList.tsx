@@ -22,9 +22,7 @@ function useList(uid: string | undefined) {
         )
       }, [db, uid])
 
-    return (
-        list
-    );
+    return list;
 }
 
 export default useList;
